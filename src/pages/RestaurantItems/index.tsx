@@ -78,6 +78,7 @@ const ItemsData: ItemModel[] = [
 ]
 
 const RestaurantItems = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [cartItems, setCartItems] = useState<any[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<ItemModel | null>(null)

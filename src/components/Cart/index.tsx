@@ -31,6 +31,7 @@ import {
 type Props = {
   isOpen: boolean
   onClose: () => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   cartItems: any[]
   onRemove: (cartId: number) => void
 }
