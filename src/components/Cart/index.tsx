@@ -10,7 +10,7 @@ import {
   AddressNumberContainer,
   AddressTitle,
   CartContainer,
-  CartItem,
+  CartI,
   CartItemImage,
   CartItemInfo,
   CartItemTitle,
@@ -27,12 +27,12 @@ import {
   SuccessMessage,
   SuccessTitle
 } from './styles'
+import { CartItem } from '../../models/RestaurantModel'
 
 type Props = {
   isOpen: boolean
   onClose: () => void
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  cartItems: any[]
+  cartItems: CartItem[]
   onRemove: (cartId: number) => void
 }
 
@@ -84,16 +84,16 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }: Props) => {
   const renderCart = () => (
     <>
       {cartItems.map((item) => (
-        <CartItem key={item.id}>
-          <CartItemImage src={item.image} alt={item.title} />
+        <CartI key={item.id}>
+          <CartItemImage src={item.image} alt={item.name} />
           <CartItemInfo>
-            <CartItemTitle>{item.title}</CartItemTitle>
+            <CartItemTitle>{item.name}</CartItemTitle>
             <p>R$ {item.price.toFixed(2)}</p>
           </CartItemInfo>
           <RemoveButton onClick={() => onRemove(item.cartId)}>
             <img src={lixeira} alt="Remover" />
           </RemoveButton>
-        </CartItem>
+        </CartI>
       ))}
       <TotalContainer>
         <p>Valor total</p>

@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-
 import estrela from '../../assets/image/estrela.png'
 import Tag from '../Tag'
 import {
@@ -13,43 +12,38 @@ import {
   Title,
   TitleRate
 } from './styles'
+import RestaurantModel from '../../models/RestaurantModel'
 
 type Props = {
-  image: string
-  title: string
-  description: string
-  infos: string[]
-  button: string
-  rating: number
+  restaurant: RestaurantModel
 }
 
-const Restaurant = ({
-  image,
-  title,
-  description,
-  infos,
-  rating,
-  button
-}: Props) => (
-  <Card>
-    <Image src={image} alt={title} />
-    <Infos>
-      {infos.map((info) => (
-        <Tag key={info}>{info}</Tag>
-      ))}
-    </Infos>
-    <TitleRate>
-      <Title>{title}</Title>
-      <RateStar>
-        <Rating>{rating}</Rating>
-        <img src={estrela} alt="estrela" />
-      </RateStar>
-    </TitleRate>
-    <Description>{description}</Description>
-    <Button as={Link} to="/items">
-      {button}
-    </Button>
-  </Card>
-)
+const Restaurant = ({ restaurant }: Props) => {
+  const tags = []
+  if (restaurant.highlighted) tags.push('Destaque da semana')
+  tags.push(restaurant.type)
+
+  return (
+    <Card>
+      <Image src={restaurant.cover} alt={restaurant.title} />
+      <Infos>
+        {tags.map((info) => (
+          <Tag key={info}>{info}</Tag>
+        ))}
+      </Infos>
+      <TitleRate>
+        <Title>{restaurant.title}</Title>
+        <RateStar>
+          <Rating>{restaurant.rating}</Rating>
+          <img src={estrela} alt="estrela" />
+        </RateStar>
+      </TitleRate>
+      <Description>{restaurant.description}</Description>
+      <Button as={Link} to={`/restaurante/${restaurant.id}`}>
+        Ver cardápio
+      </Button>
+    </Card>
+  )
+}
 
 export default Restaurant

@@ -1,5 +1,5 @@
-import ItemModel from '../../models/ItemModel'
 import botao_x from '../../assets/image/botao-x.png'
+import { MenuItem } from '../../models/RestaurantModel'
 
 import {
   AddToCartButton,
@@ -16,12 +16,11 @@ import {
 type Props = {
   isOpen: boolean
   onClose: () => void
-  item: ItemModel | null
-  onAddToCart: (item: ItemModel) => void
+  item: MenuItem | null
+  onAddToCart: (item: MenuItem) => void
 }
 
 const ItemDetails = ({ isOpen, onClose, item, onAddToCart }: Props) => {
-  console.log('🔴🔴🔴 onAddToCart é:', onAddToCart, 'tipo:', typeof onAddToCart)
   if (!isOpen || !item) return null
 
   const addToCart = () => {
@@ -37,12 +36,12 @@ const ItemDetails = ({ isOpen, onClose, item, onAddToCart }: Props) => {
           <CloseButtonImg src={botao_x} alt="Fechar" />
         </CloseButton>
         <DetailsInfo>
-          <DetailsImage src={item.image} alt={item.title} />
+          <DetailsImage src={item.image} alt={item.name} />
           <div>
-            <Title>{item.title}</Title>
+            <Title>{item.name}</Title>
             <Description>
-              {item.longDescription} <br /> <br />
-              Serve de: 2 a 3 pessoas
+              {item.description} <br /> <br />
+              Serve de: {item.portion}
             </Description>
             <AddToCartButton onClick={addToCart}>
               Adicionar ao carrinho - R$ {item.price.toFixed(2)}

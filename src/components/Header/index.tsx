@@ -1,6 +1,5 @@
 import efoodLogo from '../../assets/image/logo.png'
 import imagemDeFundo from '../../assets/image/imagem-de-fundo.png'
-import imagemDeFundoItems from '../../assets/image/imagem-de-fundo-items.png'
 
 import {
   BannerFoodType,
@@ -11,20 +10,22 @@ import {
   Logo,
   Title
 } from './styles'
+import RestaurantModel from '../../models/RestaurantModel'
 
 type Props = {
   variante?: 'padrão' | 'items'
   mostrarCarrinho?: boolean
   onCartClick?: () => void
   cartQuantity?: number
-  children?: React.ReactNode
+  restaurant?: RestaurantModel
 }
 
 const Header = ({
   variante = 'padrão',
   mostrarCarrinho = false,
   onCartClick,
-  cartQuantity
+  cartQuantity,
+  restaurant
 }: Props) => {
   if (variante === 'padrão') {
     return (
@@ -48,10 +49,10 @@ const Header = ({
           </p>
         </ContainerItemsVar>
       </Image>
-      <BannerImage style={{ backgroundImage: `url(${imagemDeFundoItems})` }}>
+      <BannerImage style={{ backgroundImage: `url(${restaurant?.cover})` }}>
         <div className="container">
-          <BannerFoodType>Italiana</BannerFoodType>
-          <BannerRestaurantTitle>La Dolce Vita Trattoria</BannerRestaurantTitle>
+          <BannerFoodType>{restaurant?.type}</BannerFoodType>
+          <BannerRestaurantTitle>{restaurant?.title}</BannerRestaurantTitle>
         </div>
       </BannerImage>
     </>

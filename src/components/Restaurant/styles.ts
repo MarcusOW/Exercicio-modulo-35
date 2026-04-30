@@ -51,4 +51,5 @@ export const Button = styled(TagContainer).attrs({ size: 'big' })`
   margin-left: 8px;
   cursor: pointer;
   color: ${cores.brancoQuente};
+  display: inline-block;
 `

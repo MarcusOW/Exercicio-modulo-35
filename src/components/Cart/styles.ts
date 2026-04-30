@@ -37,7 +37,7 @@ export const CloseButton = styled.button`
   cursor: pointer;
   align-self: flex-end;
 `
-export const CartItem = styled.div`
+export const CartI = styled.div`
   display: flex;
   position: relative;
   background-color: ${cores.brancoQuente};

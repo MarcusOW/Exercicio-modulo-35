@@ -1,92 +1,38 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 
 import Header from '../../components/Header'
-import ItemList from '../../components/ItemList/indes'
-import ItemModel from '../../models/ItemModel'
+import ItemList from '../../components/ItemList'
 import ItemDetails from '../../components/ItemDetails'
 import Cart from '../../components/Cart'
-
-import pizzaMarguerita from '../../assets/image/item.png'
-
-const ItemsData: ItemModel[] = [
-  {
-    id: 1,
-    image: pizzaMarguerita,
-    title: 'Pizza Marguerita',
-    description:
-      'A clássica Marguerita: molho de tomate suculento, mussarela derretida, manjericão fresco e um toque de azeite. Sabor e simplicidade!',
-    longDescription:
-      'A pizza Margherita é uma pizza clássica da culinária italiana, reconhecida por sua simplicidade e sabor inigualável. Ela é feita com uma base de massa fina e crocante, coberta com molho de tomate fresco, queijo mussarela de alta qualidade, manjericão fresco e azeite de oliva extra-virgem. A combinação de sabores é perfeita, com o molho de tomate suculento e ligeiramente ácido, o queijo derretido e cremoso e as folhas de manjericão frescas, que adicionam um toque de sabor herbáceo. É uma pizza simples, mas deliciosa, que agrada a todos os paladares e é uma ótima opção para qualquer ocasião.',
-    button: 'Mais detalhes',
-    price: 60.9
-  },
-  {
-    id: 2,
-    image: pizzaMarguerita,
-    title: 'Pizza Marguerita',
-    description:
-      'A clássica Marguerita: molho de tomate suculento, mussarela derretida, manjericão fresco e um toque de azeite. Sabor e simplicidade!',
-    longDescription:
-      'A pizza Margherita é uma pizza clássica da culinária italiana, reconhecida por sua simplicidade e sabor inigualável. Ela é feita com uma base de massa fina e crocante, coberta com molho de tomate fresco, queijo mussarela de alta qualidade, manjericão fresco e azeite de oliva extra-virgem. A combinação de sabores é perfeita, com o molho de tomate suculento e ligeiramente ácido, o queijo derretido e cremoso e as folhas de manjericão frescas, que adicionam um toque de sabor herbáceo. É uma pizza simples, mas deliciosa, que agrada a todos os paladares e é uma ótima opção para qualquer ocasião.',
-    button: 'Mais detalhes',
-    price: 60.9
-  },
-  {
-    id: 3,
-    image: pizzaMarguerita,
-    title: 'Pizza Marguerita',
-    description:
-      'A clássica Marguerita: molho de tomate suculento, mussarela derretida, manjericão fresco e um toque de azeite. Sabor e simplicidade!',
-    longDescription:
-      'A pizza Margherita é uma pizza clássica da culinária italiana, reconhecida por sua simplicidade e sabor inigualável. Ela é feita com uma base de massa fina e crocante, coberta com molho de tomate fresco, queijo mussarela de alta qualidade, manjericão fresco e azeite de oliva extra-virgem. A combinação de sabores é perfeita, com o molho de tomate suculento e ligeiramente ácido, o queijo derretido e cremoso e as folhas de manjericão frescas, que adicionam um toque de sabor herbáceo. É uma pizza simples, mas deliciosa, que agrada a todos os paladares e é uma ótima opção para qualquer ocasião.',
-    button: 'Mais detalhes',
-    price: 60.9
-  },
-  {
-    id: 4,
-    image: pizzaMarguerita,
-    title: 'Pizza Marguerita',
-    description:
-      'A clássica Marguerita: molho de tomate suculento, mussarela derretida, manjericão fresco e um toque de azeite. Sabor e simplicidade!',
-    longDescription:
-      'A pizza Margherita é uma pizza clássica da culinária italiana, reconhecida por sua simplicidade e sabor inigualável. Ela é feita com uma base de massa fina e crocante, coberta com molho de tomate fresco, queijo mussarela de alta qualidade, manjericão fresco e azeite de oliva extra-virgem. A combinação de sabores é perfeita, com o molho de tomate suculento e ligeiramente ácido, o queijo derretido e cremoso e as folhas de manjericão frescas, que adicionam um toque de sabor herbáceo. É uma pizza simples, mas deliciosa, que agrada a todos os paladares e é uma ótima opção para qualquer ocasião.',
-    button: 'Mais detalhes',
-    price: 60.9
-  },
-  {
-    id: 5,
-    image: pizzaMarguerita,
-    title: 'Pizza Marguerita',
-    description:
-      'A clássica Marguerita: molho de tomate suculento, mussarela derretida, manjericão fresco e um toque de azeite. Sabor e simplicidade!',
-    longDescription:
-      'A pizza Margherita é uma pizza clássica da culinária italiana, reconhecida por sua simplicidade e sabor inigualável. Ela é feita com uma base de massa fina e crocante, coberta com molho de tomate fresco, queijo mussarela de alta qualidade, manjericão fresco e azeite de oliva extra-virgem. A combinação de sabores é perfeita, com o molho de tomate suculento e ligeiramente ácido, o queijo derretido e cremoso e as folhas de manjericão frescas, que adicionam um toque de sabor herbáceo. É uma pizza simples, mas deliciosa, que agrada a todos os paladares e é uma ótima opção para qualquer ocasião.',
-    button: 'Mais detalhes',
-    price: 60.9
-  },
-  {
-    id: 6,
-    image: pizzaMarguerita,
-    title: 'Pizza Marguerita',
-    description:
-      'A clássica Marguerita: molho de tomate suculento, mussarela derretida, manjericão fresco e um toque de azeite. Sabor e simplicidade!',
-    longDescription:
-      'A pizza Margherita é uma pizza clássica da culinária italiana, reconhecida por sua simplicidade e sabor inigualável. Ela é feita com uma base de massa fina e crocante, coberta com molho de tomate fresco, queijo mussarela de alta qualidade, manjericão fresco e azeite de oliva extra-virgem. A combinação de sabores é perfeita, com o molho de tomate suculento e ligeiramente ácido, o queijo derretido e cremoso e as folhas de manjericão frescas, que adicionam um toque de sabor herbáceo. É uma pizza simples, mas deliciosa, que agrada a todos os paladares e é uma ótima opção para qualquer ocasião.',
-    button: 'Mais detalhes',
-    price: 60.9
-  }
-]
+import RestaurantModel, {
+  MenuItem,
+  ApiRestaurant,
+  CartItem
+} from '../../models/RestaurantModel'
 
 const RestaurantItems = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [cartItems, setCartItems] = useState<any[]>([])
+  const { id } = useParams<{ id: string }>()
+  const [restaurant, setRestaurant] = useState<RestaurantModel | null>(null)
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [selectedItem, setSelectedItem] = useState<ItemModel | null>(null)
+  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
 
   const cartQuantity = cartItems.length
 
-  const addToCart = (item: ItemModel) => {
-    setCartItems([...cartItems, { ...item, cartId: Date.now() }])
+  useEffect(() => {
+    fetch('https://api-ebac.vercel.app/api/efood/restaurantes')
+      .then((res) => res.json())
+      .then((data: ApiRestaurant[]) => {
+        const found = data.find((item) => item.id === Number(id))
+        if (found) {
+          setRestaurant(new RestaurantModel(found))
+        }
+      })
+  }, [id])
+
+  const addToCart = (item: MenuItem) => {
+    setCartItems((prev) => [...prev, { ...item, cartId: Date.now() }])
     setSelectedItem(null)
   }
 
@@ -94,8 +40,12 @@ const RestaurantItems = () => {
     setCartItems(cartItems.filter((item) => item.cartId !== cartId))
   }
 
-  const openModal = (item: ItemModel) => {
+  const openModal = (item: MenuItem) => {
     setSelectedItem(item)
+  }
+
+  if (!restaurant) {
+    return <h4>Carregando...</h4>
   }
 
   return (
@@ -105,8 +55,9 @@ const RestaurantItems = () => {
         mostrarCarrinho={true}
         cartQuantity={cartQuantity}
         onCartClick={() => setIsCartOpen(true)}
+        restaurant={restaurant}
       />
-      <ItemList items={ItemsData} onItemClick={openModal} />
+      <ItemList items={restaurant.menu} onItemClick={openModal} />
       <ItemDetails
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
