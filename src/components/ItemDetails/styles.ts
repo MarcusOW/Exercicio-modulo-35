@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { breakpoints, cores } from '../../styles'
 
 export const Overlay = styled.div`
   position: fixed;
@@ -15,8 +15,10 @@ export const DetailsContainer = styled.div`
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100%;
+  width: 90%;
   max-width: 1024px;
+  max-height: 90vh;
+  overflow-y: auto;
   z-index: 1000;
   padding: 32px;
   background-color: ${cores.salmão};
@@ -25,11 +27,24 @@ export const DetailsInfo = styled.div`
   display: flex;
   color: ${cores.branco};
   gap: 24px;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
 `
 export const DetailsImage = styled.img`
   width: 280px;
   height: 280px;
   object-fit: cover;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    width: 100%;
+    max-width: 240px;
+    height: auto;
+  }
 `
 export const CloseButton = styled.button`
   position: absolute;

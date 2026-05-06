@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 
+import { close, remove } from '../../store/reducers/cart'
+import { RootState } from '../../store'
 import lixeira from '../../assets/image/lixeira-de-reciclagem.svg'
 
 import {
@@ -27,21 +30,16 @@ import {
   SuccessMessage,
   SuccessTitle
 } from './styles'
-import { CartItem } from '../../models/RestaurantModel'
 
-type Props = {
-  isOpen: boolean
-  onClose: () => void
-  cartItems: CartItem[]
-  onRemove: (cartId: number) => void
-}
-
-const Cart = ({ isOpen, onClose, cartItems, onRemove }: Props) => {
+const Cart = () => {
+  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { isOpen, items } = useSelector((state: RootState) => state.cart)
+
   const [step, setStep] = useState<'cart' | 'address' | 'payment'>('cart')
   const [orderCompleted, setOrderCompleted] = useState(false)
   const [orderNumber, setOrderNumber] = useState<number | null>(null)
-  const total = cartItems.reduce((acc, item) => acc + item.price, 0)
+  const total = items.reduce((acc, item) => acc + item.price, 0)
 
   const finalizeOrder = () => {
     const newOrderNumber = Date.now()
@@ -50,7 +48,7 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }: Props) => {
   }
 
   const concluded = () => {
-    onClose()
+    dispatch(close())
     navigate('/')
   }
 
@@ -59,7 +57,7 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }: Props) => {
   if (orderCompleted) {
     return (
       <>
-        <Overlay onClick={onClose} />
+        <Overlay onClick={() => dispatch(close())} />
         <CartContainer>
           <SuccessTitle>Pedido realizado - Ordem #{orderNumber} </SuccessTitle>
           <SuccessMessage>
@@ -83,14 +81,14 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }: Props) => {
 
   const renderCart = () => (
     <>
-      {cartItems.map((item) => (
-        <CartI key={item.id}>
+      {items.map((item) => (
+        <CartI key={item.cartId}>
           <CartItemImage src={item.image} alt={item.name} />
           <CartItemInfo>
             <CartItemTitle>{item.name}</CartItemTitle>
             <p>R$ {item.price.toFixed(2)}</p>
           </CartItemInfo>
-          <RemoveButton onClick={() => onRemove(item.cartId)}>
+          <RemoveButton onClick={() => dispatch(remove(item.cartId))}>
             <img src={lixeira} alt="Remover" />
           </RemoveButton>
         </CartI>
@@ -178,9 +176,9 @@ const Cart = ({ isOpen, onClose, cartItems, onRemove }: Props) => {
   )
   return (
     <>
-      <Overlay onClick={onClose} />
+      <Overlay onClick={() => dispatch(close())} />
       <CartContainer>
-        {cartItems.length === 0 && step === 'cart' ? (
+        {items.length === 0 && step === 'cart' ? (
           <Hollow>Seu carrinho está vazio</Hollow>
         ) : (
           <>

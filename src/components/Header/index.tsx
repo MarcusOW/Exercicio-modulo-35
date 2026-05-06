@@ -1,3 +1,6 @@
+import { useDispatch, useSelector } from 'react-redux'
+import { open } from '../../store/reducers/cart'
+import { RootState } from '../../store'
 import efoodLogo from '../../assets/image/logo.png'
 import imagemDeFundo from '../../assets/image/imagem-de-fundo.png'
 
@@ -15,18 +18,19 @@ import RestaurantModel from '../../models/RestaurantModel'
 type Props = {
   variante?: 'padrão' | 'items'
   mostrarCarrinho?: boolean
-  onCartClick?: () => void
-  cartQuantity?: number
   restaurant?: RestaurantModel
 }
 
 const Header = ({
   variante = 'padrão',
   mostrarCarrinho = false,
-  onCartClick,
-  cartQuantity,
   restaurant
 }: Props) => {
+  const dispatch = useDispatch()
+  const cartQuantity = useSelector(
+    (state: RootState) => state.cart.items.length
+  )
+
   if (variante === 'padrão') {
     return (
       <Image style={{ backgroundImage: `url(${imagemDeFundo})` }}>
@@ -44,7 +48,7 @@ const Header = ({
         <ContainerItemsVar>
           <a href="/">Restaurantes</a>
           <img src={efoodLogo} alt="Efood-logo" />
-          <p onClick={onCartClick} style={{ cursor: 'pointer' }}>
+          <p onClick={() => dispatch(open())} style={{ cursor: 'pointer' }}>
             {mostrarCarrinho ? `${cartQuantity} produto(s) no carrinho` : ''}
           </p>
         </ContainerItemsVar>

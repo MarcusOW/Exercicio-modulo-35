@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { breakpoints, cores } from '../../styles'
 
 export const Image = styled.div`
   width: 100%;
@@ -30,6 +30,36 @@ export const ContainerItemsVar = styled.div`
   justify-content: space-between;
   font-size: 18px;
   font-weight: bold;
+
+  @media (max-width: ${breakpoints.desktop}) {
+    margin: 32px auto;
+    justify-content: center;
+    text-align: center;
+    gap: 32px;
+
+    a {
+      margin-left: 108px;
+    }
+  }
+
+  @media (max-width: ${breakpoints.tablet}) {
+    margin: 32px auto;
+    max-width: 90%;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+
+    img {
+      max-width: 80px;
+      order: -1;
+      margin: 0 auto;
+    }
+
+    a,
+    p {
+      font-size: 14px;
+    }
+  }
 `
 export const BannerImage = styled.div`
   width: 100%;

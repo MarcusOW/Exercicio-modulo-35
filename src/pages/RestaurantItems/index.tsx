@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { add, open } from '../../store/reducers/cart'
 
 import Header from '../../components/Header'
 import ItemList from '../../components/ItemList'
@@ -7,18 +9,14 @@ import ItemDetails from '../../components/ItemDetails'
 import Cart from '../../components/Cart'
 import RestaurantModel, {
   MenuItem,
-  ApiRestaurant,
-  CartItem
+  ApiRestaurant
 } from '../../models/RestaurantModel'
 
 const RestaurantItems = () => {
   const { id } = useParams<{ id: string }>()
   const [restaurant, setRestaurant] = useState<RestaurantModel | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
-  const [isCartOpen, setIsCartOpen] = useState(false)
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
-
-  const cartQuantity = cartItems.length
+  const dispatch = useDispatch()
 
   useEffect(() => {
     fetch('https://api-ebac.vercel.app/api/efood/restaurantes')
@@ -31,13 +29,9 @@ const RestaurantItems = () => {
       })
   }, [id])
 
-  const addToCart = (item: MenuItem) => {
-    setCartItems((prev) => [...prev, { ...item, cartId: Date.now() }])
+  const handleAddToCart = (item: MenuItem) => {
+    dispatch(add(item))
     setSelectedItem(null)
-  }
-
-  const removeFromCart = (cartId: number) => {
-    setCartItems(cartItems.filter((item) => item.cartId !== cartId))
   }
 
   const openModal = (item: MenuItem) => {
@@ -50,26 +44,15 @@ const RestaurantItems = () => {
 
   return (
     <>
-      <Header
-        variante="items"
-        mostrarCarrinho={true}
-        cartQuantity={cartQuantity}
-        onCartClick={() => setIsCartOpen(true)}
-        restaurant={restaurant}
-      />
+      <Header variante="items" mostrarCarrinho={true} restaurant={restaurant} />
       <ItemList items={restaurant.menu} onItemClick={openModal} />
       <ItemDetails
         isOpen={!!selectedItem}
         onClose={() => setSelectedItem(null)}
         item={selectedItem}
-        onAddToCart={addToCart}
+        onAddToCart={handleAddToCart}
       />
-      <Cart
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cartItems={cartItems}
-        onRemove={removeFromCart}
-      />
+      <Cart />
     </>
   )
 }
