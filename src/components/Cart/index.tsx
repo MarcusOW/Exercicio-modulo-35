@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
-import { close, remove } from '../../store/reducers/cart'
+import { close, remove, clear } from '../../store/reducers/cart'
 import { RootState } from '../../store'
 import lixeira from '../../assets/image/lixeira-de-reciclagem.svg'
 
@@ -45,12 +45,21 @@ const Cart = () => {
     const newOrderNumber = Date.now()
     setOrderNumber(newOrderNumber)
     setOrderCompleted(true)
+    dispatch(clear())
   }
 
   const concluded = () => {
     dispatch(close())
     navigate('/')
   }
+
+  useEffect(() => {
+    if (!isOpen) {
+      setStep('cart')
+      setOrderCompleted(false)
+      setOrderNumber(null)
+    }
+  }, [isOpen])
 
   if (!isOpen) return null
 
