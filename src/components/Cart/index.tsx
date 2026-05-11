@@ -245,7 +245,10 @@ const Cart = () => {
           id="receiver"
           name="receiver"
           value={addressFormik.values.receiver}
-          onChange={addressFormik.handleChange}
+          onChange={(e) => {
+            const withoutNumbers = e.target.value.replace(/\d/g, '')
+            addressFormik.setFieldValue('receiver', withoutNumbers)
+          }}
           onBlur={addressFormik.handleBlur}
           required
         />
@@ -259,7 +262,10 @@ const Cart = () => {
           id="address"
           name="address"
           value={addressFormik.values.address}
-          onChange={addressFormik.handleChange}
+          onChange={(e) => {
+            const withoutNumbers = e.target.value.replace(/\d/g, '')
+            addressFormik.setFieldValue('address', withoutNumbers)
+          }}
           onBlur={addressFormik.handleBlur}
           required
         />
@@ -273,7 +279,10 @@ const Cart = () => {
           id="city"
           name="city"
           value={addressFormik.values.city}
-          onChange={addressFormik.handleChange}
+          onChange={(e) => {
+            const withoutNumbers = e.target.value.replace(/\d/g, '')
+            addressFormik.setFieldValue('city', withoutNumbers)
+          }}
           onBlur={addressFormik.handleBlur}
           required
         />
@@ -358,7 +367,10 @@ const Cart = () => {
               id="name"
               name="name"
               value={paymentFormik.values.name}
-              onChange={paymentFormik.handleChange}
+              onChange={(e) => {
+                const withoutNumbers = e.target.value.replace(/\d/g, '')
+                paymentFormik.setFieldValue('name', withoutNumbers)
+              }}
               onBlur={paymentFormik.handleBlur}
               required
             />
@@ -370,7 +382,9 @@ const Cart = () => {
           </div>
           <PaymentCardRow>
             <div>
-              <label htmlFor="number">Número do cartão</label>
+              <label className="payment" htmlFor="number">
+                Número do cartão
+              </label>
               <InputMask
                 mask="9999 9999 9999 9999"
                 type="text"
@@ -390,7 +404,9 @@ const Cart = () => {
               )}
             </div>
             <div>
-              <label htmlFor="cvv">CVV</label>
+              <label className="payment" htmlFor="cvv">
+                CVV
+              </label>
               <InputMask
                 mask="999"
                 type="text"

@@ -165,12 +165,20 @@ export const PaymentCardRow = styled.div`
   grid-template-columns: 3fr 1fr;
   gap: 34px;
   margin-bottom: 16px;
+
+  .payment {
+    margin-top: 8px;
+  }
 `
 export const PaymentDateRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 34px;
   margin-bottom: 16px;
+
+  .payment {
+    margin-top: 8px;
+  }
 `
 
 export const SuccessMessage = styled.p`
@@ -189,8 +197,4 @@ export const ErrorText = styled.span`
   display: block;
   font-size: 14px;
   color: ${cores.red};
-
-  &.payment {
-    margin-top: 8px;
-  }
 `
