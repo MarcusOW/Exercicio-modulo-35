@@ -3,7 +3,8 @@ import { createGlobalStyle } from 'styled-components'
 export const cores = {
   salmão: '#E66767',
   brancoQuente: '#FFEBD9',
-  branco: '#FFFFFF'
+  branco: '#FFFFFF',
+  red: '#d31616'
 }
 
 export const breakpoints = {

@@ -110,13 +110,16 @@ export const AddressTitle = styled.h3`
   color: ${cores.brancoQuente};
   margin-bottom: 16px;
 `
-export const FormInput = styled.input`
-  width: 100%;
-  font-size: 14px;
-  font-weight: bold;
-  background-color: ${cores.brancoQuente};
-  border: none;
-  padding: 8px;
+export const RenderDiv = styled.div`
+  input,
+  InputMask {
+    width: 100%;
+    font-size: 14px;
+    font-weight: bold;
+    background-color: ${cores.brancoQuente};
+    border: none;
+    padding: 8px;
+  }
 `
 export const AddressNumberContainer = styled.div`
   display: flex;
@@ -181,4 +184,13 @@ export const SuccessTitle = styled.h3`
   font-size: 16px;
   font-weight: bold;
   color: ${cores.brancoQuente};
+`
+export const ErrorText = styled.span`
+  display: block;
+  font-size: 14px;
+  color: ${cores.red};
+
+  &.payment {
+    margin-top: 8px;
+  }
 `
