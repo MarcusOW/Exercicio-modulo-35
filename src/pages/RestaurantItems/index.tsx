@@ -6,7 +6,6 @@ import { add } from '../../store/reducers/cart'
 import Header from '../../components/Header'
 import ItemList from '../../components/ItemList'
 import ItemDetails from '../../components/ItemDetails'
-import Cart from '../../components/Cart'
 import RestaurantModel, {
   MenuItem,
   ApiRestaurant
