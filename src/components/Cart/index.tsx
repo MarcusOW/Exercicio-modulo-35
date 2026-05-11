@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
+import { useFormik } from 'formik'
 import InputMask from 'react-input-mask'
 import * as Yup from 'yup'
 
 import { close, remove, clear } from '../../store/reducers/cart'
 import { RootState } from '../../store'
+import { checkInputHasError } from '../../utils'
 import lixeira from '../../assets/image/lixeira-de-reciclagem.svg'
 
 import {
@@ -35,20 +37,40 @@ import {
 } from './styles'
 
 const addressSchema = Yup.object().shape({
-  receiver: Yup.string().required('Quem irá receber é obrigatório'),
-  address: Yup.string().required('Endereço é obrigatório'),
-  city: Yup.string().required('Cidade é obrigatória'),
-  cep: Yup.string().required('CEP é obrigatório'),
-  number: Yup.string().required('Número é obrigatório'),
+  receiver: Yup.string()
+    .required('Quem irá receber é obrigatório')
+    .min(5, 'Nome muito curto'),
+  address: Yup.string()
+    .required('Endereço é obrigatório')
+    .min(5, 'Endereço muito curto'),
+  city: Yup.string()
+    .required('Cidade é obrigatória')
+    .min(3, 'Cidade muito curta'),
+  cep: Yup.string()
+    .required('CEP é obrigatório')
+    .matches(/^\d{5}-\d{3}$/, 'CEP inválido'),
+  number: Yup.string()
+    .required('Número é obrigatório')
+    .matches(/^\d+$/, '"Número" deve conter apenas números'),
   complement: Yup.string().notRequired()
 })
 
 const paymentSchema = Yup.object().shape({
-  name: Yup.string().required('Nome no cartão é obrigatório'),
-  number: Yup.string().required('Número do cartão é obrigatório'),
-  cvv: Yup.string().required('CVV é obrigatório'),
-  month: Yup.string().required('Mês de vencimento é obrigatório'),
-  year: Yup.string().required('Ano de vencimento é obrigatório')
+  name: Yup.string()
+    .required('Nome no cartão é obrigatório')
+    .min(3, 'Nome muito curto'),
+  number: Yup.string()
+    .required('Número do cartão é obrigatório')
+    .matches(/^\d{4} \d{4} \d{4} \d{4}$/, 'Número do cartão inválido'),
+  cvv: Yup.string()
+    .required('CVV é obrigatório')
+    .matches(/^\d{3}$/, 'CVV deve ter 3 dígitos'),
+  month: Yup.string()
+    .required('Mês é obrigatório')
+    .matches(/^(0[1-9]|1[0-2])$/, 'Mês deve ter 2 dígitos'),
+  year: Yup.string()
+    .required('Ano é obrigatório')
+    .matches(/^\d{2}$/, 'Ano deve ter 2 dígitos')
 })
 
 const Cart = () => {
@@ -59,66 +81,68 @@ const Cart = () => {
   const [step, setStep] = useState<'cart' | 'address' | 'payment'>('cart')
   const [orderCompleted, setOrderCompleted] = useState(false)
   const [orderNumber, setOrderNumber] = useState<number | null>(null)
-  const [addressErrors, setAddressErrors] = useState<Record<string, string>>({})
-  const [paymentErrors, setPaymentErrors] = useState<Record<string, string>>({})
-  const [deliveryData, setDeliveryData] = useState({
-    receiver: '',
-    address: '',
-    city: '',
-    cep: '',
-    number: '',
-    complement: ''
-  })
-  const [paymentData, setPaymentData] = useState({
-    name: '',
-    number: '',
-    cvv: '',
-    month: '',
-    year: ''
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const addressFormik = useFormik({
+    initialValues: {
+      receiver: '',
+      address: '',
+      city: '',
+      cep: '',
+      number: '',
+      complement: ''
+    },
+    validationSchema: addressSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: () => setStep('payment')
   })
 
-  const handleDeliveryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setDeliveryData({ ...deliveryData, [e.target.id]: e.target.value })
-  }
-
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPaymentData({ ...paymentData, [e.target.id]: e.target.value })
-  }
+  const paymentFormik = useFormik({
+    initialValues: {
+      name: '',
+      number: '',
+      cvv: '',
+      month: '',
+      year: ''
+    },
+    validationSchema: paymentSchema,
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: () => finalizeOrder()
+  })
 
   const total = items.reduce((acc, item) => acc + item.price, 0)
 
   const finalizeOrder = async () => {
-    const isAddressValid = await validateAddress()
-    const isPaymentValid = await validatePayment()
-    if (!isAddressValid || !isPaymentValid) {
-      if (!isAddressValid) setStep('address')
-      else if (!isPaymentValid) setStep('payment')
+    if (isSubmitting) return
+    setIsSubmitting(true)
+    if (!addressFormik.isValid || !paymentFormik.isValid) {
+      if (!addressFormik.isValid) setStep('address')
+      else if (!paymentFormik.isValid) setStep('payment')
       return
     }
 
     const orderData = {
-      products: items.map((item) => ({
-        id: item.id,
-        price: item.price
-      })),
+      products: items.map((item) => ({ id: item.id, price: item.price })),
       delivery: {
-        receiver: deliveryData.receiver,
+        receiver: addressFormik.values.receiver,
         address: {
-          description: deliveryData.address,
-          city: deliveryData.city,
-          zipCode: deliveryData.cep,
-          number: Number(deliveryData.number),
-          complement: deliveryData.complement || ''
+          description: addressFormik.values.address,
+          city: addressFormik.values.city,
+          zipCode: addressFormik.values.cep.replace(/\D/g, ''),
+          number: Number(addressFormik.values.number),
+          complement: addressFormik.values.complement || ''
         }
       },
       payment: {
         card: {
-          name: paymentData.name,
-          number: paymentData.number,
-          code: Number(paymentData.cvv),
+          name: paymentFormik.values.name,
+          number: paymentFormik.values.number.replace(/\s/g, ''),
+          code: Number(paymentFormik.values.cvv),
           expires: {
-            month: Number(paymentData.month),
-            year: Number(paymentData.year)
+            month: Number(paymentFormik.values.month),
+            year: Number(paymentFormik.values.year)
           }
         }
       }
@@ -133,62 +157,23 @@ const Cart = () => {
           body: JSON.stringify(orderData)
         }
       )
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        throw new Error(`HTTP ${response.status}: ${errorText}`)
-      }
-
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const result = await response.json()
-      const newOrderNumber = result.orderId || Date.now() // fallback
+      const newOrderNumber = result.orderId || Date.now()
       setOrderNumber(newOrderNumber)
       setOrderCompleted(true)
       dispatch(clear())
     } catch (error) {
-      console.error('Erro ao finalizar pedido:', error)
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido'
-      alert(`Falha ao processar o pedido: ${message}. Tente novamente.`)
+      console.error(error)
+      alert('Falha ao processar o pedido. Tente novamente.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const concluded = () => {
     dispatch(close())
     navigate('/')
-  }
-
-  const validateAddress = async () => {
-    try {
-      await addressSchema.validate(deliveryData, { abortEarly: false })
-      setAddressErrors({})
-      return true
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors: Record<string, string> = {}
-        err.inner.forEach((e) => {
-          if (e.path) errors[e.path] = e.message
-        })
-        setAddressErrors(errors)
-      }
-      return false
-    }
-  }
-
-  const validatePayment = async () => {
-    try {
-      await paymentSchema.validate(paymentData, { abortEarly: false })
-      setPaymentErrors({})
-      return true
-    } catch (err) {
-      if (err instanceof Yup.ValidationError) {
-        const errors: Record<string, string> = {}
-        err.inner.forEach((e) => {
-          if (e.path) errors[e.path] = e.message
-        })
-        setPaymentErrors(errors)
-      }
-      return false
-    }
   }
 
   useEffect(() => {
@@ -253,82 +238,105 @@ const Cart = () => {
   const renderAddress = () => (
     <RenderDiv>
       <AddressTitle>Entrega</AddressTitle>
-      <AddressContainer>
+      <AddressContainer as="form" onSubmit={addressFormik.handleSubmit}>
         <label htmlFor="receiver">Quem irá receber</label>
         <input
           type="text"
           id="receiver"
-          value={deliveryData.receiver}
-          onChange={handleDeliveryChange}
+          name="receiver"
+          value={addressFormik.values.receiver}
+          onChange={addressFormik.handleChange}
+          onBlur={addressFormik.handleBlur}
           required
         />
-        {addressErrors.receiver && (
-          <ErrorText>{addressErrors.receiver}</ErrorText>
+        {checkInputHasError(addressFormik, 'receiver') && (
+          <ErrorText>{addressFormik.errors.receiver}</ErrorText>
         )}
+
         <label htmlFor="address">Endereço</label>
         <input
           type="text"
           id="address"
-          value={deliveryData.address}
-          onChange={handleDeliveryChange}
+          name="address"
+          value={addressFormik.values.address}
+          onChange={addressFormik.handleChange}
+          onBlur={addressFormik.handleBlur}
           required
         />
-        {addressErrors.address && (
-          <ErrorText>{addressErrors.address}</ErrorText>
+        {checkInputHasError(addressFormik, 'address') && (
+          <ErrorText>{addressFormik.errors.address}</ErrorText>
         )}
+
         <label htmlFor="city">Cidade</label>
         <input
           type="text"
           id="city"
-          value={deliveryData.city}
-          onChange={handleDeliveryChange}
+          name="city"
+          value={addressFormik.values.city}
+          onChange={addressFormik.handleChange}
+          onBlur={addressFormik.handleBlur}
           required
         />
-        {addressErrors.city && <ErrorText>{addressErrors.city}</ErrorText>}
+        {checkInputHasError(addressFormik, 'city') && (
+          <ErrorText>{addressFormik.errors.city}</ErrorText>
+        )}
+
         <AddressNumberContainer>
           <div>
             <label htmlFor="cep">CEP</label>
             <InputMask
+              mask="99999-999"
               type="text"
               id="cep"
-              value={deliveryData.cep}
-              onChange={handleDeliveryChange}
+              name="cep"
+              value={addressFormik.values.cep}
+              onChange={addressFormik.handleChange}
+              onBlur={addressFormik.handleBlur}
               required
-              mask="99999-999"
-            />
-            {addressErrors.cep && <ErrorText>{addressErrors.cep}</ErrorText>}
+            >
+              {(inputProps) => <input {...inputProps} />}
+            </InputMask>
+            {checkInputHasError(addressFormik, 'cep') && (
+              <ErrorText>{addressFormik.errors.cep}</ErrorText>
+            )}
           </div>
           <div>
             <label htmlFor="number">Número</label>
             <input
               type="text"
               id="number"
-              value={deliveryData.number}
-              onChange={handleDeliveryChange}
+              name="number"
+              inputMode="numeric"
+              pattern="\d*"
+              value={addressFormik.values.number}
+              onChange={(e) => {
+                const numericValue = e.target.value.replace(/\D/g, '')
+                addressFormik.setFieldValue('number', numericValue)
+              }}
+              onBlur={addressFormik.handleBlur}
               required
             />
-            {addressErrors.number && (
-              <ErrorText>{addressErrors.number}</ErrorText>
+            {checkInputHasError(addressFormik, 'number') && (
+              <ErrorText>{addressFormik.errors.number}</ErrorText>
             )}
           </div>
         </AddressNumberContainer>
+
         <label htmlFor="complement">Complemento (opcional)</label>
         <input
           type="text"
           id="complement"
-          value={deliveryData.complement}
-          onChange={handleDeliveryChange}
+          name="complement"
+          value={addressFormik.values.complement}
+          onChange={addressFormik.handleChange}
+          onBlur={addressFormik.handleBlur}
         />
+
         <ButtonsContainer>
-          <FormButton
-            onClick={async () => {
-              const isValid = await validateAddress()
-              if (isValid) setStep('payment')
-            }}
-          >
+          <FormButton type="submit" disabled={!addressFormik.isValid}>
             Continuar com o pagamento
           </FormButton>
-          <FormButton onClick={() => setStep('cart')}>
+          <FormButton type="button" onClick={() => setStep('cart')}>
             Voltar para o carrinho
           </FormButton>
         </ButtonsContainer>
@@ -342,85 +350,120 @@ const Cart = () => {
         <PaymentTitle>
           Pagamento - Valor a pagar R$ {total.toFixed(2)}
         </PaymentTitle>
-        <div>
-          <label htmlFor="name">Nome no cartão</label>
-          <input
-            type="text"
-            id="name"
-            value={paymentData.name}
-            onChange={handlePaymentChange}
-            required
-          />
-          {paymentErrors.name && (
-            <ErrorText className="payment">{paymentErrors.name}</ErrorText>
-          )}
-        </div>
-        <PaymentCardRow>
+        <form onSubmit={paymentFormik.handleSubmit}>
           <div>
-            <label htmlFor="number">Número do cartão</label>
-            <InputMask
+            <label htmlFor="name">Nome no cartão</label>
+            <input
               type="text"
-              id="number"
-              value={paymentData.number}
-              onChange={handlePaymentChange}
+              id="name"
+              name="name"
+              value={paymentFormik.values.name}
+              onChange={paymentFormik.handleChange}
+              onBlur={paymentFormik.handleBlur}
               required
-              mask="9999 9999 9999 9999"
             />
-            {paymentErrors.number && (
-              <ErrorText className="payment">{paymentErrors.number}</ErrorText>
+            {checkInputHasError(paymentFormik, 'name') && (
+              <ErrorText className="payment">
+                {paymentFormik.errors.name}
+              </ErrorText>
             )}
           </div>
-          <div>
-            <label htmlFor="cvv">CVV</label>
-            <InputMask
-              type="text"
-              id="cvv"
-              value={paymentData.cvv}
-              onChange={handlePaymentChange}
-              required
-              mask="999"
-            />
-            {paymentErrors.cvv && (
-              <ErrorText className="payment">{paymentErrors.cvv}</ErrorText>
-            )}
-          </div>
-        </PaymentCardRow>
-        <PaymentDateRow>
-          <div>
-            <label htmlFor="month">Mês de vencimento</label>
-            <InputMask
-              type="text"
-              id="month"
-              value={paymentData.month}
-              onChange={handlePaymentChange}
-              required
-              mask="99"
-            />
-            {paymentErrors.month && (
-              <ErrorText className="payment">{paymentErrors.month}</ErrorText>
-            )}
-          </div>
-          <div>
-            <label htmlFor="year">Ano de vencimento</label>
-            <InputMask
-              type="text"
-              id="year"
-              value={paymentData.year}
-              onChange={handlePaymentChange}
-              required
-              mask="99"
-            />
-            {paymentErrors.year && (
-              <ErrorText className="payment">{paymentErrors.year}</ErrorText>
-            )}
-          </div>
-        </PaymentDateRow>
-        <ButtonsContainer>
-          <FormButton onClick={finalizeOrder}>Finalizar pagamento</FormButton>
-          <FormButton onClick={() => setStep('address')}>
-            Voltar para a edição de endereço
-          </FormButton>
-        </ButtonsContainer>
+          <PaymentCardRow>
+            <div>
+              <label htmlFor="number">Número do cartão</label>
+              <InputMask
+                mask="9999 9999 9999 9999"
+                type="text"
+                id="number"
+                name="number"
+                value={paymentFormik.values.number}
+                onChange={paymentFormik.handleChange}
+                onBlur={paymentFormik.handleBlur}
+                required
+              >
+                {(inputProps) => <input {...inputProps} />}
+              </InputMask>
+              {checkInputHasError(paymentFormik, 'number') && (
+                <ErrorText className="payment">
+                  {paymentFormik.errors.number}
+                </ErrorText>
+              )}
+            </div>
+            <div>
+              <label htmlFor="cvv">CVV</label>
+              <InputMask
+                mask="999"
+                type="text"
+                id="cvv"
+                name="cvv"
+                value={paymentFormik.values.cvv}
+                onChange={paymentFormik.handleChange}
+                onBlur={paymentFormik.handleBlur}
+                required
+              >
+                {(inputProps) => <input {...inputProps} />}
+              </InputMask>
+              {checkInputHasError(paymentFormik, 'cvv') && (
+                <ErrorText className="payment">
+                  {paymentFormik.errors.cvv}
+                </ErrorText>
+              )}
+            </div>
+          </PaymentCardRow>
+          <PaymentDateRow>
+            <div>
+              <label htmlFor="month">Mês de vencimento</label>
+              <InputMask
+                mask="99"
+                type="text"
+                id="month"
+                name="month"
+                value={paymentFormik.values.month}
+                onChange={paymentFormik.handleChange}
+                onBlur={paymentFormik.handleBlur}
+                required
+              >
+                {(inputProps) => <input {...inputProps} />}
+              </InputMask>
+              {checkInputHasError(paymentFormik, 'month') && (
+                <ErrorText className="payment">
+                  {paymentFormik.errors.month}
+                </ErrorText>
+              )}
+            </div>
+            <div>
+              <label htmlFor="year">Ano de vencimento</label>
+              <InputMask
+                mask="99"
+                type="text"
+                id="year"
+                name="year"
+                value={paymentFormik.values.year}
+                onChange={paymentFormik.handleChange}
+                onBlur={paymentFormik.handleBlur}
+                required
+              >
+                {(inputProps) => <input {...inputProps} />}
+              </InputMask>
+              {checkInputHasError(paymentFormik, 'year') && (
+                <ErrorText className="payment">
+                  {paymentFormik.errors.year}
+                </ErrorText>
+              )}
+            </div>
+          </PaymentDateRow>
+          <ButtonsContainer>
+            <FormButton
+              type="submit"
+              disabled={!paymentFormik.isValid || isSubmitting}
+            >
+              {isSubmitting ? 'Processando...' : 'Finalizar pagamento'}
+            </FormButton>
+            <FormButton type="button" onClick={() => setStep('address')}>
+              Voltar para a edição de endereço
+            </FormButton>
+          </ButtonsContainer>
+        </form>
       </PaymentContainer>
     </RenderDiv>
   )
